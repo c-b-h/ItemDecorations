@@ -16,7 +16,7 @@ import com.sheldonchen.itemdecorations.painter.DrawablePainter;
 import com.sheldonchen.itemdecorations.painter.base.IDividerPainter;
 
 /**
- * 适用于RecyclerView网格布局以及瀑布流布局下的ItemDecoration
+ * 适用于RecyclerView网格布局以及瀑布流布局下的Divider(ItemDecoration)
  * Created by cxd on 2018/3/7
  */
 
@@ -40,29 +40,26 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
         int mSideDividerThickness = 0;
 
         /**
-         * 是否画顶部分割线.
+         * 是否画顶部（最）分割线.
          */
-        boolean mDrawTopSideDivider = false;
+        boolean mDrawTopEdgeDivider = false;
 
         /**
-         * 是否画底部分割线.
+         * 是否画底部（最）分割线.
          */
-        boolean mDrawBottomSideDivider = false;
+        boolean mDrawBottomEdgeDivider = false;
 
         /**
-         * 是否画两侧边分割线.
+         * 是否画两侧边缘（最左&最右）分割线.
          */
-        boolean mDrawTwoSidesDivider = false;
+        boolean mDrawLREdgesDivider = false;
 
         /**
-         * Painter: 支持Drawable和ColorInt.
+         * Painter: 支持Drawable和ColorInt或者自定义IDividerPainter.
          */
         IDividerPainter mPainter = null;
 
-        /**
-         * Side painter: 支持Drawable和ColorInt.
-         */
-        IDividerPainter mSidePainter = null;
+        IDividerPainter mEdgePainter = null;
 
         public Builder setOrientation(@DecorationOrientType int orientation) {
             this.mOrientation = orientation;
@@ -79,18 +76,18 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
             return this;
         }
 
-        public Builder drawTopSideDivider(boolean drawTopSideDivider) {
-            this.mDrawTopSideDivider = drawTopSideDivider;
+        public Builder drawTopEdgeDivider(boolean drawTopEdgeDivider) {
+            this.mDrawTopEdgeDivider = drawTopEdgeDivider;
             return this;
         }
 
-        public Builder drawBottomSideDivider(boolean drawBottomSideDivider) {
-            this.mDrawBottomSideDivider = drawBottomSideDivider;
+        public Builder drawBottomEdgeDivider(boolean drawBottomEdgeDivider) {
+            this.mDrawBottomEdgeDivider = drawBottomEdgeDivider;
             return this;
         }
 
-        public Builder drawTwoSidesDivider(boolean drawTwoSidesDivider) {
-            this.mDrawTwoSidesDivider = drawTwoSidesDivider;
+        public Builder drawLREdgesDivider(boolean drawLREdgesDivider) {
+            this.mDrawLREdgesDivider = drawLREdgesDivider;
             return this;
         }
 
@@ -111,12 +108,12 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
         }
 
         public Builder setPainter(@NonNull IDividerPainter painter) {
-            this.mPainter = this.mSidePainter = painter;
+            this.mPainter = this.mEdgePainter = painter;
             return this;
         }
 
         public Builder setSidePainter(@NonNull IDividerPainter painter) {
-            this.mSidePainter = painter;
+            this.mEdgePainter = painter;
             return this;
         }
 
@@ -154,7 +151,7 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
     public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
         super.onDraw(canvas, parent, state);
         if(mBuilder.mPainter == null
-                || mBuilder.mSidePainter == null) return;
+                || mBuilder.mEdgePainter == null) return;
 
         if (mBuilder.mOrientation == GridLayoutManager.VERTICAL) {
             drawOrientVerticalDivider(canvas, parent);
@@ -176,10 +173,10 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
             int right = child.getRight();
             int top = child.getBottom() + layoutParams.bottomMargin;
             int bottom = top + mBuilder.mDividerThickness;
-            if(!isLastRaw(parent, i , spanCount, childSize) || mBuilder.mDrawBottomSideDivider) {
+            if(!isLastRaw(parent, i , spanCount, childSize) || mBuilder.mDrawBottomEdgeDivider) {
                 mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
             }
-            if(mBuilder.mDrawTopSideDivider && isFirstRaw(parent, i, spanCount)) {
+            if(mBuilder.mDrawTopEdgeDivider && isFirstRaw(parent, i, spanCount)) {
                 bottom = child.getTop() - layoutParams.topMargin;
                 top = bottom - mBuilder.mDividerThickness;
                 mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
@@ -190,13 +187,13 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
             bottom = child.getBottom();
             left = child.getRight() + layoutParams.rightMargin;
             right = left + mBuilder.mSideDividerThickness;
-            if(!isLastColumn(parent, i, spanCount, childSize) || mBuilder.mDrawTwoSidesDivider) {
-                mBuilder.mSidePainter.drawDivider(canvas, left, top, right, bottom);
+            if(!isLastColumn(parent, i, spanCount, childSize) || mBuilder.mDrawLREdgesDivider) {
+                mBuilder.mEdgePainter.drawDivider(canvas, left, top, right, bottom);
             }
-            if(isFirstColumn(parent, i, spanCount) && mBuilder.mDrawTwoSidesDivider) {
+            if(isFirstColumn(parent, i, spanCount) && mBuilder.mDrawLREdgesDivider) {
                 right = child.getLeft() - layoutParams.leftMargin;
                 left = right - mBuilder.mSideDividerThickness;
-                mBuilder.mSidePainter.drawDivider(canvas, left, top, right, bottom);
+                mBuilder.mEdgePainter.drawDivider(canvas, left, top, right, bottom);
             }
         }
     }
@@ -214,10 +211,10 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
             int bottom = child.getBottom();
             int left = child.getRight() + layoutParams.rightMargin;
             int right = left + mBuilder.mDividerThickness;
-            if(!isLastColumn(parent, i, spanCount, childSize) || mBuilder.mDrawBottomSideDivider) {
+            if(!isLastColumn(parent, i, spanCount, childSize) || mBuilder.mDrawBottomEdgeDivider) {
                 mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
             }
-            if(mBuilder.mDrawTopSideDivider && isFirstColumn(parent, i, spanCount)) {
+            if(mBuilder.mDrawTopEdgeDivider && isFirstColumn(parent, i, spanCount)) {
                 right = child.getLeft() - layoutParams.leftMargin;
                 left = right - mBuilder.mDividerThickness;
                 mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
@@ -228,13 +225,13 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
             right = child.getRight();
             top = child.getBottom() + layoutParams.bottomMargin;
             bottom = top + mBuilder.mSideDividerThickness;
-            if(!isLastRaw(parent, i, spanCount, childSize) || mBuilder.mDrawTwoSidesDivider) {
-                mBuilder.mSidePainter.drawDivider(canvas, left, top, right, bottom);
+            if(!isLastRaw(parent, i, spanCount, childSize) || mBuilder.mDrawLREdgesDivider) {
+                mBuilder.mEdgePainter.drawDivider(canvas, left, top, right, bottom);
             }
-            if(isFirstRaw(parent, i, spanCount) && mBuilder.mDrawTwoSidesDivider) {
+            if(isFirstRaw(parent, i, spanCount) && mBuilder.mDrawLREdgesDivider) {
                 bottom = child.getTop() - layoutParams.topMargin;
                 top = bottom - mBuilder.mSideDividerThickness;
-                mBuilder.mSidePainter.drawDivider(canvas, left, top, right, bottom);
+                mBuilder.mEdgePainter.drawDivider(canvas, left, top, right, bottom);
             }
         }
     }
@@ -251,7 +248,7 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
 
         // 每个item分配到的offset总量.
         int dividerCount = spanCount - 1;
-        if (mBuilder.mDrawTwoSidesDivider) dividerCount = dividerCount + 2;
+        if (mBuilder.mDrawLREdgesDivider) dividerCount = dividerCount + 2;
 
         // 确保每个item分配到的offset总量相等
         int eachItemOffsetWidth = dividerCount * mBuilder.mSideDividerThickness / spanCount;
@@ -263,32 +260,32 @@ public class GridLayoutDivider extends RecyclerView.ItemDecoration {
         int bottom;
 
         if (mBuilder.mOrientation == GridLayoutManager.VERTICAL) {
-            if (isFirstRaw(parent, itemPosition, spanCount) && mBuilder.mDrawTopSideDivider) {
+            if (isFirstRaw(parent, itemPosition, spanCount) && mBuilder.mDrawTopEdgeDivider) {
                 top = mBuilder.mDividerThickness;
             }
             bottom = mBuilder.mDividerThickness;
-            if (isLastRaw(parent, itemPosition, spanCount, childCount) && !mBuilder.mDrawBottomSideDivider) {
+            if (isLastRaw(parent, itemPosition, spanCount, childCount) && !mBuilder.mDrawBottomEdgeDivider) {
                 bottom = 0;
             }
 
             int a1 = 0;
-            if(mBuilder.mDrawTwoSidesDivider) a1 = mBuilder.mSideDividerThickness;
+            if(mBuilder.mDrawLREdgesDivider) a1 = mBuilder.mSideDividerThickness;
 
             int spanIndex = getSpanIndex(parent, itemPosition, spanCount);
             int spanLastIndex = spanIndex + getSpanSize(parent, itemPosition) - 1;
             left = a1 - dc * spanIndex;
             right = eachItemOffsetWidth - a1 + dc * spanLastIndex;
         } else {
-            if(isFirstColumn(parent, itemPosition, spanCount) && mBuilder.mDrawTopSideDivider) {
+            if(isFirstColumn(parent, itemPosition, spanCount) && mBuilder.mDrawTopEdgeDivider) {
                 left = mBuilder.mDividerThickness;
             }
             right = mBuilder.mDividerThickness;
-            if(isLastColumn(parent, itemPosition, spanCount, childCount) && !mBuilder.mDrawBottomSideDivider) {
+            if(isLastColumn(parent, itemPosition, spanCount, childCount) && !mBuilder.mDrawBottomEdgeDivider) {
                 right = 0;
             }
 
             int a1 = 0;
-            if(mBuilder.mDrawTwoSidesDivider) a1 = mBuilder.mSideDividerThickness;
+            if(mBuilder.mDrawLREdgesDivider) a1 = mBuilder.mSideDividerThickness;
 
             int spanIndex = getSpanIndex(parent, itemPosition, spanCount);
             int spanLastIndex = spanIndex + getSpanSize(parent, itemPosition) - 1;

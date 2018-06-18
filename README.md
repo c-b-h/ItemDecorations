@@ -27,10 +27,10 @@ Android library helps you to draw divider(ItemDecoration) between items in Recyc
 Add the dependency
 ```
 dependencies {
-    compile 'com.aches.plugins:recyclerview-divider:1.0.0'
+    compile 'com.aches.plugins:recyclerview-divider:1.0.1'
 
     // 3.0
-    // implementation 'com.aches.plugins:recyclerview-divider:1.0.0'
+    // implementation 'com.aches.plugins:recyclerview-divider:1.0.1'
 }
 ```
 
@@ -63,9 +63,9 @@ int dividerColor = getResources().getColor(R.color.divider);
 
 GridLayoutDivider divider = new GridLayoutDivider.Builder()
         .setOrientation(LinearLayoutManager.VERTICAL)
-        .drawTopSideDivider(true)
-        .drawBottomSideDivider(true)
-        .drawTwoSidesDivider(true)
+        .drawTopEdgeDivider(true)
+        .drawBottomEdgeDivider(true)
+        .drawLREdgesDivider(true)
 // color.
         .setDividerColor(dividerColor)
         .setSideDividerColor(dividerColor)

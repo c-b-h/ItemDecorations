@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 适用于RecyclerView线性布局下的ItemDecoration
+ * 适用于RecyclerView线性布局下的Divider(ItemDecoration)
  * <p>
  * Created by cxd on 2017/05/24
  */
@@ -59,7 +59,7 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
         boolean mDrawLastDivider = false;
 
         /**
-         * Painter: 支持Drawable和ColorInt.
+         * Painter: 支持Drawable和ColorInt或者自定义IDividerPainter.
          */
         IDividerPainter mPainter = null;
 

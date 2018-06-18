@@ -9,7 +9,7 @@
                 android:width="1px"
                 android:color="#333333" />
 
-            <solid android:color="#cccccc" />
+            <solid android:color="#FF888888" />
 
             <size android:width="8dp" />
 
