@@ -1,5 +1,6 @@
 package com.sheldonchen.itemdecorations.decorations;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -7,6 +8,7 @@ import android.view.View;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.arch.core.util.Function;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,7 +64,9 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
         /**
          * Painter: 支持Drawable和ColorInt或者自定义IDividerPainter.
          */
-        IDividerPainter mPainter = null;
+//        IDividerPainter mPainter = null;
+
+        Function<Context, IDividerPainter> mLazyPainter = null;
 
         /**
          * 指定不画分割线的位置的集合(set).
@@ -84,18 +88,33 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
             return this;
         }
 
+        public Builder setLazyPainter(@NonNull Function<Context, IDividerPainter> lazyPainter) {
+            this.mLazyPainter = lazyPainter;
+            return this;
+        }
+
         public Builder setPainter(@NonNull IDividerPainter painter) {
-            this.mPainter = painter;
+            setLazyPainter((c) -> painter);
+            return this;
+        }
+
+        public Builder setLazyDividerColor(@NonNull Function<Context, Integer> lazyDividerColor) {
+            setLazyPainter((c) -> new ColorIntPainter(lazyDividerColor.apply(c)));
             return this;
         }
 
         public Builder setDividerColor(@ColorInt int color) {
-            this.mPainter = new ColorIntPainter(color);
+            setLazyDividerColor((c) -> color);
+            return this;
+        }
+
+        public Builder setLazyDividerDrawable(@NonNull Function<Context, Drawable> lazyDividerDrawable) {
+            setLazyPainter((c) -> new DrawablePainter(lazyDividerDrawable.apply(c)));
             return this;
         }
 
         public Builder setDividerDrawable(@NonNull Drawable drawable) {
-            this.mPainter = new DrawablePainter(drawable);
+            setLazyDividerDrawable((c) -> drawable);
             return this;
         }
 
@@ -156,9 +175,9 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
     }
 
     @Override
-    public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
+    public void onDraw(@NonNull Canvas canvas, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         super.onDraw(canvas, parent, state);
-        if(mBuilder.mPainter == null) return;
+        if(mBuilder.mLazyPainter == null) return;
 
         if(mBuilder.mOrientation == LinearLayoutManager.VERTICAL) {
             drawOrientVerticalDivider(canvas, parent);
@@ -181,13 +200,13 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
 
             if(i < childCount - 1 || mBuilder.mDrawLastDivider) {
                 if(!mBuilder.mNonDrawPositions.contains(layoutPos)) {
-                    mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
+                    mBuilder.mLazyPainter.apply(parent.getContext()).drawDivider(canvas, left, top, right, bottom);
                 }
             }
             if(i == 0 && mBuilder.mDrawFirstDivider) {
                 bottom = childView.getTop() - params.topMargin;
                 top = bottom - mBuilder.mDividerThickness;
-                mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
+                mBuilder.mLazyPainter.apply(parent.getContext()).drawDivider(canvas, left, top, right, bottom);
             }
         }
     }
@@ -205,13 +224,13 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
             int right = left + mBuilder.mDividerThickness;
             if(i < childCount - 1 || mBuilder.mDrawLastDivider) {
                 if(!mBuilder.mNonDrawPositions.contains(layoutPos)) {
-                    mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
+                    mBuilder.mLazyPainter.apply(parent.getContext()).drawDivider(canvas, left, top, right, bottom);
                 }
             }
             if(i == 0 && mBuilder.mDrawFirstDivider) {
                 right = childView.getLeft() - params.leftMargin;
                 left = right - mBuilder.mDividerThickness;
-                mBuilder.mPainter.drawDivider(canvas, left, top, right, bottom);
+                mBuilder.mLazyPainter.apply(parent.getContext()).drawDivider(canvas, left, top, right, bottom);
             }
         }
     }
