@@ -2,7 +2,8 @@ package com.sheldonchen.itemdecorations.painter;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.ColorInt;
+
+import androidx.annotation.ColorInt;
 
 import com.sheldonchen.itemdecorations.painter.base.IDividerPainter;
 

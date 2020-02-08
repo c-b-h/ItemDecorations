@@ -1,9 +1,10 @@
-package com.sheldonchen.itemdecorations;
+package com.sheldonchen.itemdecorations.app;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by cxd on 2017/05/17

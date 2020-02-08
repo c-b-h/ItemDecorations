@@ -1,13 +1,13 @@
-package com.sheldonchen.itemdecorations;
+package com.sheldonchen.itemdecorations.app;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import androidx.appcompat.app.AppCompatActivity;
 
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
