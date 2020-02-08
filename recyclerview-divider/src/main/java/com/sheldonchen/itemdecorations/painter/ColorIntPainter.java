@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 
 import com.sheldonchen.itemdecorations.painter.base.IDividerPainter;
 
@@ -22,7 +23,7 @@ public class ColorIntPainter implements IDividerPainter {
     }
 
     @Override
-    public void drawDivider(Canvas canvas, int left, int top, int right, int bottom) {
+    public void drawDivider(@NonNull Canvas canvas, int left, int top, int right, int bottom) {
         canvas.drawRect(left, top, right, bottom, mPaint);
     }
 

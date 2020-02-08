@@ -10,6 +10,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
+import androidx.core.util.Preconditions;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -170,100 +171,113 @@ public class LinearLayoutDivider extends RecyclerView.ItemDecoration {
     @Nullable
     private IDividerPainter mDividerPainter;
 
-    private LinearLayoutDivider(Builder builder) {
-        if (builder == null) {
-            throw new NullPointerException("LinearLayoutDivider: mBuilder can't be null.");
-        }
+    private LinearLayoutDivider(@NonNull Builder builder) {
+        Preconditions.checkNotNull(builder, "LinearLayoutDivider: mBuilder can't be null.");
         this.mBuilder = builder;
     }
 
     @Override
-    public void onDraw(@NonNull Canvas canvas, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+    public void onDraw(
+            @NonNull Canvas canvas,
+            @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         super.onDraw(canvas, parent, state);
+        @NonNull final IDividerPainter dividerPainter = dividerPainter(parent);
+
         if (mBuilder.mOrientation == LinearLayoutManager.VERTICAL) {
-            drawOrientVerticalDivider(canvas, parent);
+            drawOrientVerticalDivider(canvas, parent, dividerPainter);
         } else {
-            drawOrientHorizontalDivider(canvas, parent);
+            drawOrientHorizontalDivider(canvas, parent, dividerPainter);
         }
     }
 
-    private void drawOrientVerticalDivider(Canvas canvas, RecyclerView parent) {
+    private void drawOrientVerticalDivider(
+            @NonNull Canvas canvas,
+            @NonNull RecyclerView parent,
+            @NonNull IDividerPainter dividerPainter) {
         final int left = parent.getPaddingLeft() + mBuilder.mStartPadding;
         final int right = parent.getWidth() - parent.getPaddingRight() - mBuilder.mEndPadding;
 
         for (int i = 0, childCount = parent.getChildCount(); i < childCount; i++) {
-            View childView = parent.getChildAt(i);
-            RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) childView.getLayoutParams();
+            final View childView = parent.getChildAt(i);
+            final RecyclerView.LayoutParams params =
+                    (RecyclerView.LayoutParams) childView.getLayoutParams();
 
-            int layoutPos = parent.getChildLayoutPosition(childView);
+            final int layoutPos = parent.getChildLayoutPosition(childView);
             int top = childView.getBottom() + params.bottomMargin;
-            int bottom = top + mBuilder.mDividerThickness;
+            int bottom = top + dividerPainter.calcVerticalThickness(mBuilder.mDividerThickness);
 
             if (i < childCount - 1 || mBuilder.mDrawLastDivider) {
                 if (!mBuilder.mNonDrawPositions.contains(layoutPos)) {
-                    dividerPainter(parent).drawDivider(canvas, left, top, right, bottom);
+                    dividerPainter.drawDivider(canvas, left, top, right, bottom);
                 }
             }
             if (i == 0 && mBuilder.mDrawFirstDivider) {
                 bottom = childView.getTop() - params.topMargin;
-                top = bottom - mBuilder.mDividerThickness;
-                dividerPainter(parent).drawDivider(canvas, left, top, right, bottom);
+                top = bottom - dividerPainter.calcVerticalThickness(mBuilder.mDividerThickness);
+                dividerPainter.drawDivider(canvas, left, top, right, bottom);
             }
         }
     }
 
-    private void drawOrientHorizontalDivider(Canvas canvas, RecyclerView parent) {
+    private void drawOrientHorizontalDivider(
+            @NonNull Canvas canvas,
+            @NonNull RecyclerView parent,
+            @NonNull IDividerPainter dividerPainter) {
         final int top = parent.getPaddingTop() + mBuilder.mStartPadding;
         final int bottom = parent.getHeight() - parent.getPaddingBottom() - mBuilder.mEndPadding;
 
         for (int i = 0, childCount = parent.getChildCount(); i < childCount; i++) {
-            View childView = parent.getChildAt(i);
-            RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) childView.getLayoutParams();
+            final View childView = parent.getChildAt(i);
+            final RecyclerView.LayoutParams params =
+                    (RecyclerView.LayoutParams) childView.getLayoutParams();
 
-            int layoutPos = parent.getChildLayoutPosition(childView);
+            final int layoutPos = parent.getChildLayoutPosition(childView);
             int left = childView.getRight() + params.rightMargin;
-            int right = left + mBuilder.mDividerThickness;
+            int right = left + dividerPainter.calcHorizontalThickness(mBuilder.mDividerThickness);
             if (i < childCount - 1 || mBuilder.mDrawLastDivider) {
                 if (!mBuilder.mNonDrawPositions.contains(layoutPos)) {
-                    dividerPainter(parent).drawDivider(canvas, left, top, right, bottom);
+                    dividerPainter.drawDivider(canvas, left, top, right, bottom);
                 }
             }
             if (i == 0 && mBuilder.mDrawFirstDivider) {
                 right = childView.getLeft() - params.leftMargin;
-                left = right - mBuilder.mDividerThickness;
-                dividerPainter(parent).drawDivider(canvas, left, top, right, bottom);
+                left = right - dividerPainter.calcHorizontalThickness(mBuilder.mDividerThickness);
+                dividerPainter.drawDivider(canvas, left, top, right, bottom);
             }
         }
     }
 
     @Override
-    public void getItemOffsets(@NonNull Rect outRect,
-                               @NonNull View view,
-                               @NonNull RecyclerView parent,
-                               @NonNull RecyclerView.State state) {
+    public void getItemOffsets(
+            @NonNull Rect outRect,
+            @NonNull View view,
+            @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
+        @NonNull final IDividerPainter dividerPainter = dividerPainter(parent);
         final int currentPos = parent.getChildLayoutPosition(view);
         final int lastPos = state.getItemCount() - 1;
 
         if (mBuilder.mOrientation == LinearLayoutManager.VERTICAL) {
             if (currentPos == 0 && mBuilder.mDrawFirstDivider) {
-                outRect.top = mBuilder.mDividerThickness;
+                outRect.top = dividerPainter.calcVerticalThickness(mBuilder.mDividerThickness);
             }
             if ((currentPos == lastPos && !mBuilder.mDrawLastDivider)
                     || mBuilder.mNonDrawPositions.contains(currentPos)) {
                 outRect.bottom = 0;
             } else {
-                outRect.bottom = mBuilder.mDividerThickness;
+                outRect.bottom = dividerPainter.calcVerticalThickness(mBuilder.mDividerThickness);
             }
         } else {// horizontal.
             if (currentPos == 0 && mBuilder.mDrawFirstDivider) {
-                outRect.left = mBuilder.mDividerThickness;
+                outRect.left = dividerPainter.calcHorizontalThickness(mBuilder.mDividerThickness);
             }
             if ((currentPos == lastPos && !mBuilder.mDrawLastDivider)
                     || mBuilder.mNonDrawPositions.contains(currentPos)) {
                 outRect.right = 0;
             } else {
-                outRect.right = mBuilder.mDividerThickness;
+                outRect.right = dividerPainter.calcHorizontalThickness(mBuilder.mDividerThickness);
             }
         }
     }
